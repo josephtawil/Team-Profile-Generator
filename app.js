@@ -9,64 +9,85 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
-const id = 0;
+var id = 0;
 const employeeArray = [];
 
-inquirer.prompt(
-    [
-    {
-        type:"list",
-        name: "Role",
-        message: "What type of role do you want to create",
-        choices: ["Engineer", "Manager", "Intern"]
-    },
-    {
-        type:"input",
-        name: "name", 
-        message: "What is your name?",
-    },
+const createEmployee = () => {
+    inquirer.prompt(
+        [
         {
-            type:"input",
-        name: "email",
-        message: "What is your email"
+            type:"list",
+            name: "Role",
+            message: "What type of role do you want to create",
+            choices: ["Engineer", "Manager", "Intern"]
         },
         {
             type:"input",
-        name: "officenumber",
-        message: "What is your office number",
-        when: (answers) => answers.Role === "Manager"
+            name: "name", 
+            message: "What is your name?",
         },
-        {
-            type: "input",
-            name: "github", 
-            message: "What is your github",
-            when: (answers) => answers.Role === "Engineer"
-        },
-        {
-            type: "input",
-            name: "school",
-            message: "What is the school you got to",
-            when: (answers) => answers.Role === "Intern"
-        }
-        ]).then((answers)=>{
-            if(answers.type === "Manager"){
-                employeeArray.push(new Manager(answers.name, answers.email, id, answers.officenumber));
-                id++;
+            {
+                type:"input",
+            name: "email",
+            message: "What is your email"
+            },
+            {
+                type:"input",
+            name: "officenumber",
+            message: "What is your office number",
+            when: (answers) => answers.Role === "Manager"
+            },
+            {
+                type: "input",
+                name: "github", 
+                message: "What is your github",
+                when: (answers) => answers.Role === "Engineer"
+            },
+            {
+                type: "input",
+                name: "school",
+                message: "What is the school you got to",
+                when: (answers) => answers.Role === "Intern"
             }
-            else if(answers.type === "Engineer"){
-                employeeArray.push(new Engineer(answers.name, answers.email, id, answers.github));
-                id++;
-            }
-            else if(answers.type === "Intern"){
-                employeeArray.push(new Intern(answers.name, answers.email, id, answers.school));
-                id++;
-            }
-            
-            
+            ]).then((answers)=>{
+                if(answers.Role === "Manager"){
+                    employeeArray.push(new Manager(answers.name, answers.email, id, answers.officenumber));
+                    id++;
+                }
+                else if(answers.Role === "Engineer"){
+                    employeeArray.push(new Engineer(answers.name, answers.email, id, answers.github));
+                    id++;
+                }
+                else if(answers.Role === "Intern"){
+                    employeeArray.push(new Intern(answers.name, answers.email, id, answers.school));
+                    id++;
+                }
+                
+                inquirer.prompt({
+                    type: "confirm",
+                    name: "anotherone",
+                    message: "Add another employee?",
+                }).then((res)=>{
+                    if(res.anotherone === true){
+                        createEmployee();
+                    }
+                    else{
+                       const employees = render(employeeArray);
+                       fs.writeFile("./output/team.html", employees, (err) => {
+                           if(err) throw err;
+                           console.log("Successfully added employee");
+                       })
+                    };
+                })
+                
 
-}).catch(error=>{
-    console.log(error);
-})
+    }).catch(error=>{
+        console.log(error);
+    });
+}
+
+createEmployee();
+
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 
