@@ -9,27 +9,61 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
+const id = 0;
+const employeeArray = [];
 
 inquirer.prompt(
     [
     {
-    type:"input",
-    name: "id",
-    message: "What is your id number"
+        type:"list",
+        name: "Role",
+        message: "What type of role do you want to create",
+        choices: ["Engineer", "Manager", "Intern"]
     },
     {
         type:"input",
-    name: "email",
-    message: "What is your email"
+        name: "name", 
+        message: "What is your name?",
     },
-    {
-        type:"input",
-    name: "office number",
-    message: "What is your office number"
-    }
-]
-    ).then(answers=>{
-    console.log(answers);
+        {
+            type:"input",
+        name: "email",
+        message: "What is your email"
+        },
+        {
+            type:"input",
+        name: "officenumber",
+        message: "What is your office number",
+        when: (answers) => answers.Role === "Manager"
+        },
+        {
+            type: "input",
+            name: "github", 
+            message: "What is your github",
+            when: (answers) => answers.Role === "Engineer"
+        },
+        {
+            type: "input",
+            name: "school",
+            message: "What is the school you got to",
+            when: (answers) => answers.Role === "Intern"
+        }
+        ]).then((answers)=>{
+            if(answers.type === "Manager"){
+                employeeArray.push(new Manager(answers.name, answers.email, id, answers.officenumber));
+                id++;
+            }
+            else if(answers.type === "Engineer"){
+                employeeArray.push(new Engineer(answers.name, answers.email, id, answers.github));
+                id++;
+            }
+            else if(answers.type === "Intern"){
+                employeeArray.push(new Intern(answers.name, answers.email, id, answers.school));
+                id++;
+            }
+            
+            
+
 }).catch(error=>{
     console.log(error);
 })
